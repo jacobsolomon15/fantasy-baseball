@@ -1,0 +1,21 @@
+$def with (worker_id, questions, questions_to_display)
+
+$var title: Quiz
+
+
+$# First, a list of the random question numbers
+
+<div class="bar"></div>
+    <div class="main">
+        <p>Please take this quiz to ensure you understand the instructions. If you do not pass the quiz, you will be redirected back to the instruction page</p>
+        <form action="/check_quiz/$worker_id" id= method="post" >
+        $for i in questions_to_display:
+            <p>$questions[i]["question"]</p>
+                <ul class="quiz">
+                    $for j in ['a', 'b', 'c', 'd']:
+                        <li><input type="radio" value="$j", name="q$i"/>$j: $questions[i][j]</li>
+                </ul>
+        </form
+            
+        
+    </div>

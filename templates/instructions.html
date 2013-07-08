@@ -1,0 +1,24 @@
+$def with (worker_id, condition)
+
+$var title: Instructions
+
+    <div id="intro">
+        <p>Intro text</p>
+    </div>
+    <div id="s1">
+        <p>More text</p>
+    </div>
+    
+    $if condition == 1:
+        <div id="c_instructions">
+            <p>Instructions for customizable system</p>
+        </div>
+    $else:
+        <div id="n_instructions">
+            <p>Instructions for non customizabl system</p>
+        </div>
+        
+    <div id="continue">
+        <p>Be sure you fully understand the instructions. Before completing the task, you must pass a quiz on these instructions</p>
+        <p><a href="/quiz?worker_id=$worker_id">Click here to continue to the quiz</a></p>
+    </div>

@@ -1,0 +1,62 @@
+$def with (worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
+
+
+<table>
+    <tr>
+        <td>Records</td>
+        <td>AWAY</td>
+        <td>HOME</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>$game_data["wins_a"] - $game_data["losses_a"] (${game_data["wins_a"] / (game_data["wins_a"] + game_data["losses_a"])})</td>
+        <td>$game_data["wins_h"] - $game_data["losses_h"] (${game_data["wins_h"] / (game_data["wins_h"] + game_data["losses_h"])})</td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <td>Batting</td>
+        <td>AWAY</td>
+        <td>HOME</td>
+    </tr>
+    
+    $for v in var_names_batting:
+        <tr>
+            <td>$var_names_batting[v]</td>
+            <td>$game_data[v+"_a"]</td>
+            <td>$game_data[v+"_h"]</td>
+        </tr>
+</table>
+<table>
+    <tr>
+        <td>Starting Pitcher</td>
+        <td>AWAY</td>
+        <td>HOME</td>
+    </tr>
+    $for v in var_names_starter_pitching:
+        <tr>
+            <td>$var_names_starter_pitching[v]</td>
+            <td>$game_data[v+"_a"]</td>
+            <td>$game_data[v+"_h"]</td>
+        </tr>
+</table>
+<table>
+    <tr>
+        <td>Team Pitching</td>
+        <td>AWAY</td>
+        <td>HOME</td>
+    </tr>
+    $for v in var_names_team_pitching:
+        <tr>
+            <td>$var_names_team_pitching[v]</td>
+            <td>$game_data[v+"_a"]</td>
+            <td>$game_data[v+"_h"]</td>
+        </tr>
+</table>
+
+$if condition == 1:
+    <a href="/customize_recommendations?worker_id=$worker_id">Click here to customize the game simulator</a>
+$else:
+    <a href="/view_recommendations?worker_id=$worker_id">Click here to see the game simulator results</a>
+        
