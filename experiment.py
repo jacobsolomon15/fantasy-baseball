@@ -157,6 +157,8 @@ class Play:
         var_names_team_pitching = {"ERAp": "Earned Run Average", "BBp":"Walks", "SOp":"Strikeouts", "HRp":"Home Runs"}
         var_names_starter_pitching = {"Wsp":"Wins", "Lsp":"Losses", "ERAsp":"Earned Run Average", "Hsp": "Hits", "SOsp":"Strikeouts", "HRsp":"Home Runs", "IPsp":"Innings Pitched"}
         
+        
+        
         return render_game.render.game_overview(worker_id, condition, game_data, var_names_record, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
     
 class Survey:
