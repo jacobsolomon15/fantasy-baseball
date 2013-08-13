@@ -1,0 +1,11 @@
+$def with (worker_id, msg, include_link)
+
+$var title: Error
+
+<div class="main">
+    <div class="bar"></div>
+        <h2>Error</h2>
+        <p>$msg</p>
+        $if include_link == 1:
+            <p><a href="/restore?worker_id=$worker_id">Please click here to return to the experiment.</a></p>
+</div>

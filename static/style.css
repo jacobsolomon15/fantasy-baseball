@@ -1,0 +1,122 @@
+body {
+	font-family: arial, helvetica, sans-serif;
+}
+
+a {
+	color: #18453B;
+}
+
+/*body ul {
+	list-style-type: none;
+	line-height: 2;
+}*/
+
+.bar {
+	background-color: #18453B;
+	height: 20px;
+	margin: 0;
+}
+
+.main {
+	margin: 10px 100px;	
+}
+
+.main ul {
+	list-style-type: square;
+	line-height:2;
+}
+
+#contact {
+	list-style-type: none;
+}
+
+.message {
+	font-size: medium;
+	background-color: #EA8C8B;
+	padding: 1px 1px 1px 20px;
+}
+
+#evaluations ul li {
+	display: inline;
+	padding-right: 5px;
+}
+
+.evals {
+	line-height: 2;
+}
+
+#recommendations {
+	text-align: center;
+	width: 490px;
+	margin: auto;
+	float:left;
+}
+
+#recommendations ul {
+	list-style-type: square;
+	text-align: left;
+}
+
+.codeDiv {
+	width: 20%;
+	padding: 10px;
+	border-style: solid;
+	border-width: 3px;
+	border-color: #18453B;
+}
+
+#george {
+	width: 90%;
+	margin: auto;
+	border: 1px solid #18453B;
+	padding: 5px;
+}
+
+#georgeEval {
+	width: 490px;
+	margin:auto;
+	border: 1px solid #18453B;
+	padding: 5px;
+	float: left;
+	font-size: small;
+}
+
+#georgeInfo {
+	width: 50%;
+	float: left;
+}
+
+#georgePic {
+	float: left;
+}
+
+#georgePar {
+	width: 100%;
+}
+
+#georgeWrapper {
+	height: 275px;
+}
+
+#georgeWrapperEval {
+	height:inherit;
+}
+
+.gender li {
+	list-style-type: none;
+	line-height: 1;
+}
+
+.submit {
+	list-style-type: none;
+}
+
+#topEval {
+	height: 300px;
+	width:1000px;
+}
+
+#survey_main ul li {
+	display:inline;
+	padding-right: 5px;
+}

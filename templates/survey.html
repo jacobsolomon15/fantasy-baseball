@@ -1,0 +1,45 @@
+$def with (worker_id, survey_questions, customize_questions, elm_question, condition)
+
+$var title: Survey
+
+<form action="/survey/$worker_id" method = "post">
+<ul> 
+    <li>Age?<input type="text" name="age"/></li>
+    <li>Gender?
+        <ul class="gender">
+            <li><input type="radio" name="gender" value="0" />Male</li>
+            <li><input type="radio" name="gender" value="1" />Female</li>
+        </ul></li>
+    $for q in survey_questions:
+        <li>$survey_questions[q]["question"]</li>
+        <ul class="likert">
+            <li>$survey_questions[q]["low"]<input type="radio" name="$q" value="1" /></li>
+            $for i in range(2,7):
+                <li><input type="radio" name="$q" value=$i /></li>
+            <li><input type="radio" name="$q" value="7" />$survey_questions[q]["high"]</li>
+        </ul>
+</ul>
+
+$if condition == 1:
+    <ul>
+    $for c in customize_questions:
+        <li>$customize_questions[c]["question"]</li>
+        <ul class="likert">
+            <li>$customize_questions[c]["low"]<input type="radio" name="$c" value="1" /></li>
+            $for i in range(2,7):
+                <li><input type="radio" name="$c" value="$i" /></li>
+            <li><input type="radio" name="$c" value="7" />$customize_questions[c]["high"]</li>
+        </ul>
+        
+<p>$elm_question["prompt"]</p>
+    $for elm in ["elm_a", "elm_b", "elm_c"]:
+        <li>$elm_question[elm]</li>
+        <ul class="likert">
+            <li>$elm_question["low"]<input type="radio" name="$elm" value="1" /></li>
+            $for i in range(2,7):
+                <li><input type="radio" name="$elm" value=$i /></li>
+            <li><input type="radio" name="$elm" value="7" />$elm_question["high"]</li>
+        </ul>
+
+<input type="submit" />
+</form>

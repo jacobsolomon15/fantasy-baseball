@@ -1,12 +1,13 @@
-$def with (worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
+$def with (worker_id, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
 
-$var title: Game
+$var title: Customize
 <table>
     <thead>
     <tr>
         <th>Records</th>
         <th>AWAY</th>
         <th>HOME</th>
+        <th>Include?</th>
     </tr>
     </thead>
     <tbody>
@@ -14,6 +15,7 @@ $var title: Game
         <td></td>
         <td>$game_data["wins_a"] - $game_data["losses_a"] (${game_data["wins_a"] / (game_data["wins_a"] + game_data["losses_a"])})</td>
         <td>$game_data["wins_h"] - $game_data["losses_h"] (${game_data["wins_h"] / (game_data["wins_h"] + game_data["losses_h"])})</td>
+        <td><input type="checkbox" name="option" value="record" /></td>
     </tr>
     </tbody>
 </table>
@@ -24,6 +26,7 @@ $var title: Game
         <th>Batting</th>
         <th>AWAY</th>
         <th>HOME</th>
+        <th>Include?</th>
     </tr>
     </thead>
     <tbody>
@@ -32,6 +35,7 @@ $var title: Game
             <td>$var_names_batting[v]</td>
             <td>$game_data[v+"_a"]</td>
             <td>$game_data[v+"_h"]</td>
+            <td><input type="checkbox" name="option" value="$v" /></td>
         </tr>
     </tbody>
 </table>
@@ -41,6 +45,7 @@ $var title: Game
         <th>Starting Pitcher</th>
         <th>AWAY</th>
         <th>HOME</th>
+        <th>Include?</th>
     </tr>
     </thead>
     <tbody>
@@ -49,6 +54,7 @@ $var title: Game
             <td>$var_names_starter_pitching[v]</td>
             <td>$game_data[v+"_a"]</td>
             <td>$game_data[v+"_h"]</td>
+            <td><input type="checkbox" value="$v" /></td>
         </tr>
     </tbody>
 </table>
@@ -58,6 +64,7 @@ $var title: Game
         <th>Team Pitching</th>
         <th>AWAY</th>
         <th>HOME</th>
+        <th>Include?</th>
     </tr>
     </thead>
     <tbody>
@@ -66,12 +73,9 @@ $var title: Game
             <td>$var_names_team_pitching[v]</td>
             <td>$game_data[v+"_a"]</td>
             <td>$game_data[v+"_h"]</td>
+            <td><input type="checkbox" value="$v" /></td>
         </tr>
     </tbody>
 </table>
 
-$if condition == 1:
-    <a href="/customize_simulator/$worker_id">Click here to customize the game simulator</a>
-$else:
-    <a href="/view_prediction/$worker_id">Click here to see the game simulator results</a>
-        
+<a href="/view_prediction/$worker_id">Click here to see simulated scores</a>

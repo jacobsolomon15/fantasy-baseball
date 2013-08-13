@@ -1,6 +1,43 @@
-$def with (worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
+$def with (worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality)
 
-$var title: Game
+$var title: Simulated Game
+
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th>AWAY</th>
+        <th>HOME</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td></td>
+        <td>
+            $if prediction_quality == 1:
+                $game_data["bad_score_a"]
+            $else:
+                $game_data["score_a"]
+        </td>
+        <td>
+            $if prediction_quality == 1:
+                $game_data["bad_score_h"]
+            $else:
+                $game_data["score_h"]
+        </td>
+    </tr>
+    <form action="/submit_prediction/$worker_id" method="post">
+    <tr>
+        <td></td>
+        <td><input type="text" name="away" /></td>
+        <td><input type="text" name="home" /></td>
+        <td><input type="text" name="confidence" /></td>
+        <input type="hidden" name="game_id" value="$game_data['id']" />
+    </tr>
+    </tbody>
+</table>
+<input type="submit" />
+    </form>
 <table>
     <thead>
     <tr>
@@ -69,9 +106,3 @@ $var title: Game
         </tr>
     </tbody>
 </table>
-
-$if condition == 1:
-    <a href="/customize_simulator/$worker_id">Click here to customize the game simulator</a>
-$else:
-    <a href="/view_prediction/$worker_id">Click here to see the game simulator results</a>
-        
