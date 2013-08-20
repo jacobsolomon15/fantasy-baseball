@@ -1,21 +1,54 @@
-$def with (worker_id, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
+$def with (worker_id, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, game_number)
 
 $var title: Customize
+
+<body>
+<div id="main">
+<div id="top_half">
+<h2>Game $game_number of 12</h2>
+
+    
+<!--<a class="nostyle" href="/view_prediction/$worker_id"><span class="mybutton">Click here to see simulated scores</span></a>-->
+</div>
+<div id="bottom_half">
+<div id="right_side">
+<div id="selected_categories">
+    <h3 class="selected_header">Categories for emphasis:</h3>
+        <p id="selected_msg">No categories selected. The simulator will treat all comparisons equally.</p>
+    <ol id="selected_list">
+    </ol>
+</div>
+<form name="customization" action="/view_prediction/$worker_id" method="post">
+    <div>
+<input type="hidden" id="selections" name="selections" >
+<input type="submit" id="submit_button" value="Click here to simulate the game" >
+    </div>
+</form>
+<div id="custom_instructions" class="small_instructions">
+    <h3>Instructions</h3>
+    <p>The simulator can focus on specific statistical categories that you believe will be most important in this game and increase their importance in the simulation.</p>
+    <p>In addition to selecting categories, you can arrange your chosen comparisons in the order of importance. The category listed as #1 will receive the most emphasis in the simulation.</p>
+    <p><strong>You can select up to 5 statistical comparisons for the simulator to emphasize.</strong></p>
+    <p>If you select no categories, the simulator gives all comparisons equal emphasis</p>
+</div>
+</div>
+<div id="left_side">
+<div id="tables">
 <table>
     <thead>
     <tr>
         <th>Records</th>
         <th>AWAY</th>
         <th>HOME</th>
-        <th>Include?</th>
+        <th>Emphasize?</th>
     </tr>
     </thead>
     <tbody>
     <tr>
-        <td></td>
-        <td>$game_data["wins_a"] - $game_data["losses_a"] (${game_data["wins_a"] / (game_data["wins_a"] + game_data["losses_a"])})</td>
-        <td>$game_data["wins_h"] - $game_data["losses_h"] (${game_data["wins_h"] / (game_data["wins_h"] + game_data["losses_h"])})</td>
-        <td><input type="checkbox" name="option" value="record" /></td>
+        <td>Season-to-date</td>
+        <td>$game_data["wins_a"] - $game_data["losses_a"] ($game_data["away_pct"])</td>
+        <td>$game_data["wins_h"] - $game_data["losses_h"] ($game_data["home_pct"])</td>
+        <td><input type="button" class="stat_button" name="record" value="Add" onclick="addCategory('Records', 'record')" ></td>
     </tr>
     </tbody>
 </table>
@@ -26,7 +59,7 @@ $var title: Customize
         <th>Batting</th>
         <th>AWAY</th>
         <th>HOME</th>
-        <th>Include?</th>
+        <th>Emphasize?</th>
     </tr>
     </thead>
     <tbody>
@@ -35,7 +68,7 @@ $var title: Customize
             <td>$var_names_batting[v]</td>
             <td>$game_data[v+"_a"]</td>
             <td>$game_data[v+"_h"]</td>
-            <td><input type="checkbox" name="option" value="$v" /></td>
+            <td><input type="button" class="stat_button" name="$v" value="Add" onclick="addCategory('$var_names_batting[v]', '$v')" ></td>
         </tr>
     </tbody>
 </table>
@@ -45,7 +78,7 @@ $var title: Customize
         <th>Starting Pitcher</th>
         <th>AWAY</th>
         <th>HOME</th>
-        <th>Include?</th>
+        <th>Emphasize?</th>
     </tr>
     </thead>
     <tbody>
@@ -54,7 +87,7 @@ $var title: Customize
             <td>$var_names_starter_pitching[v]</td>
             <td>$game_data[v+"_a"]</td>
             <td>$game_data[v+"_h"]</td>
-            <td><input type="checkbox" value="$v" /></td>
+            <td><input type="button" class="stat_button" name="$v" value="Add" onclick="addCategory('$var_names_starter_pitching[v]', '$v')" ></td>
         </tr>
     </tbody>
 </table>
@@ -64,7 +97,7 @@ $var title: Customize
         <th>Team Pitching</th>
         <th>AWAY</th>
         <th>HOME</th>
-        <th>Include?</th>
+        <th>Emphasize?</th>
     </tr>
     </thead>
     <tbody>
@@ -73,9 +106,11 @@ $var title: Customize
             <td>$var_names_team_pitching[v]</td>
             <td>$game_data[v+"_a"]</td>
             <td>$game_data[v+"_h"]</td>
-            <td><input type="checkbox" value="$v" /></td>
+            <td><input type="button" class="stat_button" name="$v" value="Add" onclick="addCategory('$var_names_team_pitching[v]', '$v')" ></td>
         </tr>
     </tbody>
 </table>
-
-<a href="/view_prediction/$worker_id">Click here to see simulated scores</a>
+</div>
+</div>
+</div>
+</div>

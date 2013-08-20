@@ -1,7 +1,19 @@
-$def with (worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
+$def with (worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, game_number)
 
 $var title: Game
-<table>
+<body>
+<div id="main">
+<h2>Game $game_number of 12</h2>
+$if condition == 1:
+    <div id="nextbutton">
+    <a class="nostyle" href="/customize_simulator/$worker_id"><span class="mybutton">Click here to customize the game simulator</span></a>
+    </div>
+$else:
+    <div id="nextbutton">
+    <a class="nostyle" href="/view_prediction/$worker_id"><span class="mybutton">Click here to see the game simulator results</span></a>
+    </div>
+<p>All statistics are season totals to the date of the game</p>
+<table class="stats">
     <thead>
     <tr>
         <th>Records</th>
@@ -11,14 +23,14 @@ $var title: Game
     </thead>
     <tbody>
     <tr>
-        <td></td>
-        <td>$game_data["wins_a"] - $game_data["losses_a"] (${game_data["wins_a"] / (game_data["wins_a"] + game_data["losses_a"])})</td>
-        <td>$game_data["wins_h"] - $game_data["losses_h"] (${game_data["wins_h"] / (game_data["wins_h"] + game_data["losses_h"])})</td>
+        <td>Season-to-date</td>
+        <td>$game_data["wins_a"] - $game_data["losses_a"] ($game_data["away_pct"])</td>
+        <td>$game_data["wins_h"] - $game_data["losses_h"] ($game_data["home_pct"])</td>
     </tr>
     </tbody>
 </table>
 
-<table>
+<table class="stats">
     <thead>
     <tr>
         <th>Batting</th>
@@ -35,7 +47,7 @@ $var title: Game
         </tr>
     </tbody>
 </table>
-<table>
+<table class="stats">
     <thead>
     <tr>
         <th>Starting Pitcher</th>
@@ -52,7 +64,7 @@ $var title: Game
         </tr>
     </tbody>
 </table>
-<table>
+<table class="stats">
     <thead>
     <tr>
         <th>Team Pitching</th>
@@ -70,8 +82,6 @@ $var title: Game
     </tbody>
 </table>
 
-$if condition == 1:
-    <a href="/customize_simulator/$worker_id">Click here to customize the game simulator</a>
-$else:
-    <a href="/view_prediction/$worker_id">Click here to see the game simulator results</a>
+
+</div>
         

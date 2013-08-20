@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import division
 import web, random, string
 
 db = web.database(dbn='mysql', db = 'fantasy', user = 'fantasy_sports', pw = 'fantasy1234')
@@ -50,7 +50,11 @@ def get_game_id(worker_id):
     
 def get_game_data(game_id):
     q = "select * from games where id = %s" % (str(game_id))
-    return db.query(q)[0]
+    data = dict(db.query(q)[0])
+    data["home_pct"] = round((data["wins_h"] / (data["wins_h"] + data["losses_h"])), 3)
+    data["away_pct"] = round((data["wins_a"] / (data["wins_a"] + data["losses_a"])),3)
+    
+    return data
     
     
     #return db.select('games', where='id=$game_id')
@@ -100,7 +104,8 @@ def update_prediction_start_fixed(worker_id, prediction_quality):
     
 def update_prediction_start_custom(worker_id, data, prediction_quality):
     games_played = get_games_played(worker_id)
-    q = "update predictions set enter_predictions_start = now(), bad_recommendation = %s, custom_category_1 = '%s', custom_category_2 = '%s', custom_category_3 = '%s', custom_category_4 = '%s', custom_category_5 = '%s' where worker_id = '%s' and order = %s" % (str(prediction_quality), data[1], data[2], data[3], data[4], data[5], worker_id, str(games_played+1))
+    q = "update predictions set enter_predictions_start = now(), bad_recommendation = %s, custom_category_1 = '%s', custom_category_2 = '%s', custom_category_3 = '%s', custom_category_4 = '%s', custom_category_5 = '%s' where worker_id = '%s' and game_order = %s" % (str(prediction_quality), data[1], data[2], data[3], data[4], data[5], worker_id, str(games_played+1))
+    print q
     db.query(q)
 
 def add_prediction(worker_id, data):

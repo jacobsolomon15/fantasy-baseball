@@ -116,7 +116,15 @@ a {
 	width:1000px;
 }
 
-#survey_main ul li {
+#survey_main li {
+	padding:8px;
+	list-style-type:none;
+}
+
+.likert ul li {
 	display:inline;
-	padding-right: 5px;
+}
+
+.question div {
+	border-bottom: 1px solid gray;
 }

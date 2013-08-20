@@ -3,11 +3,12 @@
 
 ####TODO's
 
-#2. Error handling
 #4. Validate forms
-#5. Prevent cheaters from doing it twice, going back and redoing customization
+#5. Style the game pages
+#       Add more instruction info to the game pages
+#       Add some sort of "delay" to mimic the simulator taking a bit to generate the simulations
 
-
+from __future__ import division
 import web, random, model, string
 render_main = web.template.render('templates/', base = 'layout') # This defines the layout template for pages like instructions, consent, survey
 render_game = web.template.render('templates/', base = 'game_layout') # The layout and css for the game pages are different, and so they need a different layout base template
@@ -29,8 +30,8 @@ urls = (
 )
 
 var_names_batting = {"ba": "Batting Average", "runs": "Runs", "H":"Hits", "2B":"2B", "3B":"3B", "HR":"Home Runs", "OBP":"On-Base Percentage", "SLG":"Slugging Percentage", "BB":"Walks", "SB":"Stolen Bases", "RBI":"Runs Batted In"}
-var_names_team_pitching = {"ERAp": "Earned Run Average", "BBp":"Walks", "SOp":"Strikeouts", "HRp":"Home Runs"}
-var_names_starter_pitching = {"Wsp":"Wins", "Lsp":"Losses", "ERAsp":"Earned Run Average", "Hsp": "Hits", "SOsp":"Strikeouts", "HRsp":"Home Runs", "IPsp":"Innings Pitched"}
+var_names_team_pitching = {"ERAp": "ERA (team)", "BBp":"Walks", "SOp":"Strikeouts", "HRp":"Home Runs"}
+var_names_starter_pitching = {"Wsp":"Wins", "Lsp":"Losses", "ERAsp":"ERA (starter)", "Hsp": "Hits", "SOsp":"Strikeouts", "HRsp":"Home Runs", "IPsp":"Innings Pitched"}
    
 
 class Consent:
@@ -206,9 +207,9 @@ class CheckQuiz:
     
 class Play:
     def GET(self, worker_id):
-        var_names_batting = {"ba": "Batting Average", "runs": "Runs", "H":"Hits", "2B":"2B", "3B":"3B", "HR":"Home Runs", "OBP":"On-Base Percentage", "SLG":"Slugging Percentage", "BB":"Walks", "SB":"Stolen Bases", "RBI":"Runs Batted In"}
-        var_names_team_pitching = {"ERAp": "Earned Run Average", "BBp":"Walks", "SOp":"Strikeouts", "HRp":"Home Runs"}
-        var_names_starter_pitching = {"Wsp":"Wins", "Lsp":"Losses", "ERAsp":"Earned Run Average", "Hsp": "Hits", "SOsp":"Strikeouts", "HRsp":"Home Runs", "IPsp":"Innings Pitched"}
+        #var_names_batting = {"ba": "Batting Average", "runs": "Runs", "H":"Hits", "2B":"2B", "3B":"3B", "HR":"Home Runs", "OBP":"On-Base Percentage", "SLG":"Slugging Percentage", "BB":"Walks", "SB":"Stolen Bases", "RBI":"Runs Batted In"}
+        #var_names_team_pitching = {"ERAp": "Earned Run Average", "BBp":"Walks", "SOp":"Strikeouts", "HRp":"Home Runs"}
+        #var_names_starter_pitching = {"Wsp":"Wins", "Lsp":"Losses", "ERAsp":"Earned Run Average", "Hsp": "Hits", "SOsp":"Strikeouts", "HRsp":"Home Runs", "IPsp":"Innings Pitched"}
         
         #worker_id = web.input(worker_id='').worker_id
         condition = model.get_condition(worker_id)
@@ -217,6 +218,7 @@ class Play:
             raise web.seeother('/error/3')
         
         # Returns an int with the id number of the next game, or None if 12 games have been played
+        game_number = model.get_games_played(worker_id) + 1
         game_id = model.get_game_id(worker_id)
         if not game_id:
             raise web.seeother('/survey/' + worker_id)
@@ -229,7 +231,10 @@ class Play:
             check2 = model.check_current_game_status(worker_id, game_id)
             
             if not check2:
-                return render_game.game_overview(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
+                if condition == 1:
+                    raise web.seeother('/customize_simulator/' + worker_id)
+                else:
+                    return render_game.game_overview(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, game_number)
                 
             else:
                 raise web.seeother('/view_prediction/' + worker_id)
@@ -253,7 +258,10 @@ class Play:
         #    model.create_prediction_entry(worker_id, game_id)
         
         model.create_prediction_entry(worker_id, game_id)
-        return render_game.game_overview(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
+        if condition == 1:
+            raise web.seeother('/customize_simulator/' + worker_id)
+        else:
+            return render_game.game_overview(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, game_number)
     
 class Survey:
     def GET(self, worker_id):
@@ -273,10 +281,10 @@ class Survey:
         }
         
         elm_question = {
-            "prompt": "When performing this task, I was:",
-            "elm_a": "extending a good deal of cognitive effort",
-            "elm_b": "Resting my mind",
-            "elm_c": "Doing my best to think about making the best prediction",
+            "prompt": "When performing this task, I was...",
+            "elm_a": "... extending a good deal of cognitive effort",
+            "elm_b": "... resting my mind",
+            "elm_c": "... doing my best to think about making the best prediction",
             "low": "Strongly Disagree",
             "high": "Strongly Agree"
         }
@@ -304,7 +312,8 @@ class Survey:
             except KeyError:
                 continue
         
-        
+        if questions["age"] == "":
+            questions["age"] = str(0)
         model.add_survey_responses(worker_id, questions)
         model.update_stage(worker_id)
         
@@ -314,9 +323,11 @@ class Survey:
 class CustomizeSimulator:
     def GET(self, worker_id):
         model.update_prediction_custom_start(worker_id)
+        game_number = model.get_games_played(worker_id) + 1
         game_id = model.get_game_id(worker_id)
         game_data = model.get_game_data(game_id)
-        return render_game.customize(worker_id, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching)
+        return render_game.customize(worker_id, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, game_number)
+        
     
 class ViewPrediction:
     def GET(self, worker_id):
@@ -324,25 +335,44 @@ class ViewPrediction:
         
         if condition > 1:
             raise web.seeother('/error/3')
-        
+        game_number = model.get_games_played(worker_id) + 1
         game_id = model.get_game_id(worker_id)
         game_data = model.get_game_data(game_id)
         prediction_quality = model.get_prediction_quality(worker_id, game_id)
         model.update_prediction_start_fixed(worker_id, prediction_quality)
-        return render_game.predictions(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality)  
+        return render_game.predictions(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality, game_number)  
         
     def POST(self, worker_id):
-        data = web.input() # TODO- make sure this pulls the data correctly from the http request
-        # TODO- turn this data object into a dict where the keys represent the order the category was placed and the values are the name of the category
-        #       - This is necessary to enter it into the db
-        
-        model.update_prediction_start_custom(worker_id, data)
+        # First make sure the user hasn't already customized
         game_id = model.get_game_id(worker_id)
-        game_data = model_get_game_data(game_id)
-        prediction_quality = model.get_prediction_quality(worker_id, game_id)
-        model.add_customize_info(worker_id, data, prediction_quality)
+        check = model.check_current_game_status(worker_id, game_id)
+        if check:
+            raise web.seeother('/error/5?worker_id=' + worker_id)
         
-        return render_game.predictions(worker_id, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality)
+        
+        post_data = web.input()
+        selections = post_data.selections
+        ## Put the selections into a dict
+        
+        temp = selections.split(',')
+        data = {}
+        i = 1
+        while i < 6:
+            try:
+                data[i] = temp[i-1]
+            except IndexError:
+                data[i] = "NULL"
+            i += 1
+        
+        condition = model.get_condition(worker_id)   
+        
+        game_data = model.get_game_data(game_id)
+        game_number = model.get_games_played(worker_id) + 1
+        prediction_quality = model.get_prediction_quality(worker_id, game_id)
+        model.update_prediction_start_custom(worker_id, data, prediction_quality)
+        
+        
+        return render_game.predictions(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality, game_number)
         
 class SubmitPrediction:
     def POST(self, worker_id):

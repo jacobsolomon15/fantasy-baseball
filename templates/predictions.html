@@ -1,43 +1,80 @@
-$def with (worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality)
+$def with (worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality, game_number)
 
 $var title: Simulated Game
-
+<body onload="loadSimulatorPredictions()">
+<div id="main">
+<h2>Game $game_number of 12</h2>
+<div id="top_enclosure">
+<div id="loading"><img src="/static/ajax-loader.gif" alt="Loading..."><p>Please wait...</p></div>
+<div id="enter_predictions">
+    <form id="predictions" action="/submit_prediction/$worker_id" method="post" >
 <table>
     <thead>
     <tr>
         <th></th>
         <th>AWAY</th>
         <th>HOME</th>
+        <th>Confidence Points Wagered</th>
     </tr>
     </thead>
     <tbody>
     <tr>
+        <td>Simulator prediction</td>
+        <td>
+            $if prediction_quality == 1:
+                <strong>$game_data["bad_score_a"]</strong>
+            $else:
+                <strong>$game_data["score_a"]</strong>
+        </td>
+        <td>
+            $if prediction_quality == 1:
+                <strong>$game_data["bad_score_h"]</strong>
+            $else:
+                <strong>$game_data["score_h"]</strong>
+        </td>
         <td></td>
-        <td>
-            $if prediction_quality == 1:
-                $game_data["bad_score_a"]
-            $else:
-                $game_data["score_a"]
-        </td>
-        <td>
-            $if prediction_quality == 1:
-                $game_data["bad_score_h"]
-            $else:
-                $game_data["score_h"]
-        </td>
     </tr>
-    <form action="/submit_prediction/$worker_id" method="post">
+    
     <tr>
-        <td></td>
-        <td><input type="text" name="away" /></td>
-        <td><input type="text" name="home" /></td>
-        <td><input type="text" name="confidence" /></td>
-        <input type="hidden" name="game_id" value="$game_data['id']" />
+        <td>Your prediction</td>
+        <td><input type="text" name="away" size="3" ></td>
+        <td><input type="text" name="home" size="3" ></td>
+        <td><select name="confidence">
+            <option value="-">-</option>
+            $for i in range(11):
+                <option value="$i">$i</option>
+            </select>*Required
+        </td>
     </tr>
     </tbody>
 </table>
-<input type="submit" />
-    </form>
+<div>
+<input type="hidden" name="game_id" value="$game_data['id']" >
+<input type="button" id="submit_button" onclick="validatePredictions()" value="Enter your prediction">
+</div>
+</form>
+
+</div>
+<div id="right_side">
+<div id="instructions" class="small_instructions">
+    <h3>Instructions</h3>
+    <p>Your score for your prediction of each game is calculated as follows:</p>
+    <ul>
+        <li>You start with 20 points</li>
+        <li>If you choose the incorrect winner of the game, you lose 10 points</li>
+        <li>For each team, you also lose 1 point for the absolute difference between their runs scored and your prediction for their runs scored</li>
+        <li>The minumum number of points you can earn is 0</li>
+    </ul>
+    $if condition == 1:
+        <p>The simulator scores an average of about 15 points per game when no statistical categories are selected, but this varies from game to game. Customizing the simulator be emphasizing important categories can improve performance, but it can also lead to worse performance if less important categories are emphasized.</p>
+    $else:
+        <p>On average, the simulator scores about 15 points per game. But this varies from game to game.</p>
+    <p><strong>Confidence points:</strong>You have 10 confidence points for this game. You may wager between 0 and 10 points on your prediction. The wager is that you scored at least <strong>15 points</strong> from your prediction. The return on this wager is 3 to 1. This wager is intended to indicate your confidence in your prediction.</p>
+</div></div>
+</div>
+<div id="bottom_half">
+<div id="left_side">
+<div id="stats">
 <table>
     <thead>
     <tr>
@@ -48,9 +85,9 @@ $var title: Simulated Game
     </thead>
     <tbody>
     <tr>
-        <td></td>
-        <td>$game_data["wins_a"] - $game_data["losses_a"] (${game_data["wins_a"] / (game_data["wins_a"] + game_data["losses_a"])})</td>
-        <td>$game_data["wins_h"] - $game_data["losses_h"] (${game_data["wins_h"] / (game_data["wins_h"] + game_data["losses_h"])})</td>
+        <td>Season-to-date</td>
+        <td>$game_data["wins_a"] - $game_data["losses_a"] ($game_data["away_pct"])</td>
+        <td>$game_data["wins_h"] - $game_data["losses_h"] ($game_data["home_pct"])</td>
     </tr>
     </tbody>
 </table>
@@ -106,3 +143,7 @@ $var title: Simulated Game
         </tr>
     </tbody>
 </table>
+</div>
+</div>
+</div>
+</div>

@@ -7,13 +7,11 @@ $var title: Instructions
         <p>Thank you for agreeing to participate in this research. In this study, you will play a fantasy baseball game, and use a new tool to help you play the game</p>
     </div>
     <div id="s1">
-        <p>The fantasy baseball game asks you to predict the scores of twelve Major Leage Baseball games. Before you make your prediction for each game, you will use a new tool that will help you analyze statistics about each team.</p>
-        <p>This tool will also make make a prediction about the game based on a statistical simulation of the game. We are hoping to improve this system by incorporating human judgment and knowledge.</p>
-    </div>
-    
+        <p>The fantasy baseball game asks you to predict the scores of twelve Major Leage Baseball games. Before you make your prediction for each game, you will use an experimental tool that will help you analyze statistics about each team.</p>
+        <p>This tool will also make make a prediction about the game based on a statistical simulation of the game. In this research, we are hoping to improve this system by incorporating human judgment and knowledge from baseball fans into the statistical simulations.</p>
+    </div>    
         <div id="instructions">
-            <p>First, you will have a chance to look at the season statistics for each team (see the screenshot below).</p>
-            <!-- TODO put screenshot here -->
+            <p>In the game, you will be shown statistics about each team. These statistics are season totals up to the day of the game.</p>
             $if condition == 1:
                         <p>Next, you will have a chance to customize the our simulator's prediction algorithm. By default, the simulator will treat all statistical comparisons between the teams equally. However, the simulator can focus on specific statistical categories that you believe will be most important in this game and increase their importance in the simulation.</p>
                         <p>You can choose up to five statistics for the simulator to focus on in the simulation. The simulator's performance can be improved by customizing it to give more weight to more important categories.</p>
@@ -26,8 +24,8 @@ $var title: Instructions
                         <li>For each team, you also lose 1 point for the absolute difference between their runs scored and your prediction for their runs scored</li>
                         <li>The minumum number of points you can earn is 0</li>
 	    </ul>
-	    <p>For example, if the final score of a game is Away team 5, Home team 3, and you predicted Away team 2, Home team 4, you would earn 5 points. You lose 10 for choosing the wrong winner. For the away team, you missed by 3 runs, and you missed the home team by two runs, leaving you with 5 for the game.</p>
-	    <p>The simulator scores an average of 15 points per game</p>
+	    <p>For example, if the final score of a game is Away team 5, Home team 3, and you predicted Away team 2, Home team 4, you would earn 5 points. You lose 10 for choosing the wrong winner. For the away team, you missed by 3 runs, and you missed the home team by 2 runs, leaving you with 5 for the game.</p>
+	    <p>On average, the simulator scores about 15 points per game. But this varies from game to game.</p>
 	    <p><strong>Confidence points:</strong> In addition to earning points directly from your predictions, for each game you are given an additional 10 points. With these points, you may keep them and add them to your total for the game. Or you can wager some or all of them. The wager is that you scored at least 15 points from your prediction. The return on this wager is 3 to 1. If you wager 4 confidence points and you earn 15 points from your prediction, you will earn 12 additional points. This wager is intended to indicate your confidence in your prediction.</p>
 	    
 
@@ -38,12 +36,7 @@ $var title: Instructions
 			<p>The names of teams and players have been removed. This is intended to prevent biases in making decisions because of being a fan of a particular team or player.</p>
 			<p>The games that you are making predictions about have actually happened in the past. This is because we have not developed the infrastructure to incorporate up-to-date statistical information in real time into the simulator.</p>
 			<p>However, the study and the simulator treat each game as if it has not yet been played. All statistical information used by the simulator is from the beginning of the season to the date the game was played.</p>
-	</div>
-
-
-        
-
-        
+	</div>     
     <div id="continue">
         <p>Be sure you fully understand the instructions. Before completing the task, you must pass a quiz on these instructions</p>
         <p><a href="/quiz?worker_id=$worker_id">Click here to continue to the quiz</a></p>
