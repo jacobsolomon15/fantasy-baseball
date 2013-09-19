@@ -7,8 +7,7 @@ $var title: Customize
 <div id="top_half">
 <h2>Game $game_number of 12</h2>
 
-    
-<!--<a class="nostyle" href="/view_prediction/$worker_id"><span class="mybutton">Click here to see simulated scores</span></a>-->
+
 </div>
 <div id="bottom_half">
 <div id="right_side">
@@ -18,7 +17,7 @@ $var title: Customize
     <ol id="selected_list">
     </ol>
 </div>
-<form name="customization" action="/view_prediction/$worker_id" method="post">
+<form name="customization" action="/submit_customization/$worker_id/$game_number" method="post">
     <div>
 <input type="hidden" id="selections" name="selections" >
 <input type="submit" id="submit_button" value="Click here to simulate the game" >

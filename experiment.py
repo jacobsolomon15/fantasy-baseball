@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 
 ####TODO's
@@ -19,9 +19,10 @@ urls = (
     '/instructions/(.*)', 'Instructions',
     '/quiz', 'Quiz',
     '/check_quiz', 'CheckQuiz',
-    '/play/(.*)', 'Play',
-    '/customize_simulator/(.*)', 'CustomizeSimulator',
-    '/view_prediction/(.*)', 'ViewPrediction',
+    '/play/(.*)/(.*)', 'Play',
+    '/customize_simulator/(.*)/(.*)', 'CustomizeSimulator',
+    '/submit_customization/(.*)/(.*)', 'SubmitCustomization',
+    '/view_prediction/(.*)/(.*)', 'ViewPrediction',
     '/submit_prediction/(.*)', 'SubmitPrediction',
     '/survey/(.*)', 'Survey',
     '/claim_code/(.*)', 'Claim',
@@ -91,6 +92,8 @@ class Instructions:
         if condition > 1:
             # If a condition isn't returned, redirect to an error page
             raise web.seeother('/error/3')
+            
+        model.update_instructions_views(worker_id)
         
         
         return render_main.instructions(worker_id, condition)
@@ -101,14 +104,16 @@ class Quiz:
         worker_id = web.input(worker_id='').worker_id
         condition = model.get_condition(worker_id)
         
+        model.update_quiz_tries(worker_id)
+        
         # Prevent question 7 from being available to non-customizable users
         if condition == 1:
             max_question_number = 8
         elif condition > 1:
             raise web.seeother('/error/3')
         else:
-            max_question_number = 7
-        questions_to_display = random.sample(range(1,max_question_number), 3)
+            max_question_number = 6
+        questions_to_display = random.sample(range(1,max_question_number+1), 3)
         questions = {
             1: {
                 "question": "How many games will you make predictions for?",
@@ -118,7 +123,7 @@ class Quiz:
                 "d" : "12"
             },
             2: {
-                "question": "If you predict that the home team will win 4-3, and the home team wins 6-2, how many points do you earn?",
+                "question": "How many points do the simulator's predictions score on average?",
                 "a" : "10",
                 "b" : "21",
                 "c" : "15",
@@ -134,7 +139,7 @@ class Quiz:
             },
             4:
                 {
-                "question": "If you predict the away team to win 7-2, and the home team wins 6-5, how many points do you earn for your prediction?",
+                "question": "If you predict Away: 7 | Home: 2 and the final score is Away: 5 | Home: 6, how many points do you earn for your prediction?",
                 "a" : "0",
                 "b" : "10",
                 "c" : "4",
@@ -142,28 +147,36 @@ class Quiz:
             },
             5:
                 {
-                "question": "If you wager 8 confidence points, and you earn 8 points from your predictions, what is your TOTAL score for the game (prediction points plus confidence points)?",
-                "a" : "8",
-                "b" : "10",
-                "c" : "16",
-                "d" : "32"
+                "question": "The statistics about the teams are ...",
+                "a" : "... totals from the last 5 games.",
+                "b" : "... totals and averages from the current season up to the day of the game.",
+                "c" : "... totals from the past 5 seasons.",
+                "d" : "... averages for the past 5 seasons."
             },
             6:
                 {
                 "question": "Which of the following statements is FALSE?",
                 "a" : "You will be shown statistical information about each of the teams prior to making your predictions.",
-                "b" : "You will be shown the names of all teams and players",
-                "c" : "The minimum number of points you can earn is 0",
-                "d" : "The maximimum number of points you can earn is 50"
+                "b" : "You will not be shown the names of the teams",
+                "c" : "You will be shown your scores for the game within 1 week through a bonus payment made to your MTurk account",
+                "d" : "The simulator's prediction always scores exactly 15 points"
             },
             7:
                 {
                 "question": "Which of the following statements is TRUE?",
-                "a": "You will NOT have the opportunity to customizae the simulator's algorithm",
+                "a": "You will NOT have the opportunity to customize the simulator's algorithm",
                 "b": "You can select six statistical comparisons for the simulator to focus on",
                 "c": "The simulator's performance can be improved by customizing it to give more weight to more important categories",
                 "d": "By default, the simulator treats winning percentage as the most important statistical comparison between the teams"
-                }
+                },
+            8:
+            	{
+            	"question": "Which of the following statements is FALSE?",
+            	"a": "By default, the simulator treats all statistical comparisons between the teams equally",
+            	"b": "A statistical category that you have selected to customize the simulator is given more weight in the simulation than one that you have not chosen",
+            	"c": "A statistical category that you have placed at #1 in your list is given more weight than a category at #3 in your list in the simulation",
+            	"d": "By default, the records of each team is given the most weight in the simulation"
+            	}
         }
         
         
@@ -171,20 +184,31 @@ class Quiz:
         
 class CheckQuiz:
     def POST(self):
-        worker_id = web.input(worker_id='').worker_id
+    
+    	worker_id = web.input(worker_id='').worker_id
+    	
+    	#Check that they haven't already passed the quiz
+    	
+    	check = model.check_for_passed_quiz(worker_id)
+    	if check:
+    		raise web.seeother("/restore?worker_id=" + worker_id)
+    
+        
         answer_key = {
             "q1": "d",
-            "q2": "d",
+            "q2": "c",
             "q3": "a",
             "q4": "c",
             "q5": "b",
-            "q6": "b",
-            "q7": "c"
+            "q6": "d",
+            "q7": "c",
+            "q8": "d"
         }
         
         
         passed = True
-        for i in range(1,7):
+        questions_answered = 0
+        for i in range(1,9):
             try:
                 question_number = "q" + str(i)
                 answer = web.input()[question_number]
@@ -192,13 +216,18 @@ class CheckQuiz:
                 continue
             
             if answer_key[question_number] == answer:
-                pass
+            	questions_answered += 1
+                continue
             else:
                 passed = False
+                break
+        if questions_answered < 3:
+        	passed = False
                 
         if passed:
             model.update_stage(worker_id)
-            raise web.seeother('/play/' + worker_id)
+            model.update_quiz_completed(worker_id)
+            raise web.seeother('/play/' + worker_id + "/1")
         else:
             #redirect back to the instructions and record the failed try in the db
             model.view_instructions(worker_id)
@@ -206,7 +235,7 @@ class CheckQuiz:
 
     
 class Play:
-    def GET(self, worker_id):
+    def GET(self, worker_id, game_number):
         #var_names_batting = {"ba": "Batting Average", "runs": "Runs", "H":"Hits", "2B":"2B", "3B":"3B", "HR":"Home Runs", "OBP":"On-Base Percentage", "SLG":"Slugging Percentage", "BB":"Walks", "SB":"Stolen Bases", "RBI":"Runs Batted In"}
         #var_names_team_pitching = {"ERAp": "Earned Run Average", "BBp":"Walks", "SOp":"Strikeouts", "HRp":"Home Runs"}
         #var_names_starter_pitching = {"Wsp":"Wins", "Lsp":"Losses", "ERAsp":"Earned Run Average", "Hsp": "Hits", "SOsp":"Strikeouts", "HRsp":"Home Runs", "IPsp":"Innings Pitched"}
@@ -218,8 +247,9 @@ class Play:
             raise web.seeother('/error/3')
         
         # Returns an int with the id number of the next game, or None if 12 games have been played
-        game_number = model.get_games_played(worker_id) + 1
-        game_id = model.get_game_id(worker_id)
+        #game_number = model.get_games_played(worker_id) + 1
+        game_number = int(game_number)
+        game_id = model.get_game_id(worker_id, game_number)
         if not game_id:
             raise web.seeother('/survey/' + worker_id)
         game_data = model.get_game_data(game_id)
@@ -232,12 +262,13 @@ class Play:
             
             if not check2:
                 if condition == 1:
-                    raise web.seeother('/customize_simulator/' + worker_id)
+                    raise web.seeother('/customize_simulator/' + worker_id + "/" + str(game_number))
                 else:
+                    print "check2 caught"
                     return render_game.game_overview(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, game_number)
                 
             else:
-                raise web.seeother('/view_prediction/' + worker_id)
+                raise web.seeother('/view_prediction/' + worker_id + "/" + str(game_number))
             
             
         
@@ -259,7 +290,7 @@ class Play:
         
         model.create_prediction_entry(worker_id, game_id)
         if condition == 1:
-            raise web.seeother('/customize_simulator/' + worker_id)
+            raise web.seeother('/customize_simulator/' + worker_id + "/" + str(game_number))
         else:
             return render_game.game_overview(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, game_number)
     
@@ -321,30 +352,43 @@ class Survey:
         raise web.seeother("/claim_code/" + worker_id)
         
 class CustomizeSimulator:
-    def GET(self, worker_id):
+    def GET(self, worker_id, game_number):
         model.update_prediction_custom_start(worker_id)
-        game_number = model.get_games_played(worker_id) + 1
-        game_id = model.get_game_id(worker_id)
+        #game_number = model.get_games_played(worker_id) + 1
+        game_number = int(game_number)
+        game_id = model.get_game_id(worker_id, game_number)
         game_data = model.get_game_data(game_id)
+        
+        #check that they haven't already customized
+        check = model.check_current_game_status(worker_id, game_id)
+        if check:
+            raise web.seeother('/error/5?worker_id=' + worker_id)
+        
         return render_game.customize(worker_id, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, game_number)
         
     
 class ViewPrediction:
-    def GET(self, worker_id):
+    def GET(self, worker_id, game_number):
         condition = model.get_condition(worker_id)
         
         if condition > 1:
             raise web.seeother('/error/3')
-        game_number = model.get_games_played(worker_id) + 1
-        game_id = model.get_game_id(worker_id)
+        
+        #game_number = model.get_games_played(worker_id) + 1
+        game_number = int(game_number)
+        game_id = model.get_game_id(worker_id, game_number)
         game_data = model.get_game_data(game_id)
         prediction_quality = model.get_prediction_quality(worker_id, game_id)
-        model.update_prediction_start_fixed(worker_id, prediction_quality)
+        if condition == 0:
+            model.update_prediction_start_fixed(worker_id, prediction_quality)
         return render_game.predictions(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality, game_number)  
-        
-    def POST(self, worker_id):
+
+class SubmitCustomization:        
+    def POST(self, worker_id, game_number):
         # First make sure the user hasn't already customized
-        game_id = model.get_game_id(worker_id)
+        
+        game_id = model.get_game_id(worker_id, game_number)
+        print "checking current game status"
         check = model.check_current_game_status(worker_id, game_id)
         if check:
             raise web.seeother('/error/5?worker_id=' + worker_id)
@@ -367,12 +411,13 @@ class ViewPrediction:
         condition = model.get_condition(worker_id)   
         
         game_data = model.get_game_data(game_id)
-        game_number = model.get_games_played(worker_id) + 1
+        #game_number = model.get_games_played(worker_id) + 1
+        game_number = int(game_number)
         prediction_quality = model.get_prediction_quality(worker_id, game_id)
         model.update_prediction_start_custom(worker_id, data, prediction_quality)
         
-        
-        return render_game.predictions(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality, game_number)
+        raise web.seeother("/view_prediction/" + worker_id + "/" + str(game_number))
+        #return render_game.predictions(worker_id, condition, game_data, var_names_batting, var_names_team_pitching, var_names_starter_pitching, prediction_quality, game_number)
         
 class SubmitPrediction:
     def POST(self, worker_id):
@@ -386,7 +431,8 @@ class SubmitPrediction:
         
         
         model.add_prediction(worker_id, data)
-        raise web.seeother('/play/' + worker_id)
+        next_game = model.get_games_played(worker_id) + 1
+        raise web.seeother('/play/' + worker_id + "/" + str(next_game))
         
 class Error:
     def GET(self, error_num):
@@ -423,7 +469,12 @@ class Restore: #Figures out where in the experiment the user is at and redirect 
             3:"/survey/",
             4:"/claim_code/"
         }
-        raise web.seeother(stages[stage] + worker_id)
+        
+        if stage == 2:
+        	next_game = model.get_games_played(worker_id) + 1
+        	raise web.seeother('/play/' + worker_id + '/' + str(next_game))
+        else:
+	        raise web.seeother(stages[stage] + worker_id)
 
     
 class Claim:
@@ -437,7 +488,16 @@ class Claim:
             return render_main.claim(worker_id,code)
         else:
             raise web.seeother('/error/2?worker_id=' + worker_id)
+
+#Uncomment the lines below to run in development mode
     
+# if __name__ == '__main__':
+#     app = web.application(urls, globals())
+#     app.run()
+
+
+# Uncomment out the following lines to run in development mode
+app = web.application(urls, globals())
+web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)    
 if __name__ == '__main__':
-    app = web.application(urls, globals())
     app.run()

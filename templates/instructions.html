@@ -4,19 +4,18 @@ $var title: Instructions
 <div class="bar"></div>
 <div class="main">
     <div id="intro">
-        <p>Thank you for agreeing to participate in this research. In this study, you will play a fantasy baseball game, and use a new tool to help you play the game</p>
+        <p>Thank you for agreeing to participate in this research. In this study, you will play a fantasy baseball game, and use a new statistical simulator to help you play.</p>
     </div>
     <div id="s1">
-        <p>The fantasy baseball game asks you to predict the scores of twelve Major Leage Baseball games. Before you make your prediction for each game, you will use an experimental tool that will help you analyze statistics about each team.</p>
-        <p>This tool will also make make a prediction about the game based on a statistical simulation of the game. In this research, we are hoping to improve this system by incorporating human judgment and knowledge from baseball fans into the statistical simulations.</p>
+        <p>The fantasy baseball game asks you to predict the scores of 12 Major Leage Baseball games. Before you make your prediction for each game, you will use an experimental tool that will help you analyze statistics about each team. and provide a statistical simulation of the game. In this research, we are hoping to improve this tool by incorporating human judgment and knowledge from baseball fans into the statistical simulations.</p>
     </div>    
         <div id="instructions">
-            <p>In the game, you will be shown statistics about each team. These statistics are season totals up to the day of the game.</p>
+            <p>In the game, you will be shown statistics about each team. These statistics are season totals and averages up to the day of the game.</p>
             $if condition == 1:
-                        <p>The simulator works by comparing each team across numerous statistical categories, and then simulating the game using an algorithm to predict the most likely score for each team.</p>
-                        <p>By default, the simulator treats all statistical comparisons equally in the simulation. This means for example, that the relative strength of each team in stealing bases is as important as the relative strenght of the team's records in the simulation.</p>
-			<p>The performance of the simulator can be improved by customizing it to give more important statistical categories more emphasis in the algorithm. You will have the opportunity to select up to 5 categories for the algorithm to emphasize. Also, you can arrange any categories you choose according to their importance.</p>
-			<p>For example, if you believe that the number of stolen bases is the most important category, you could select it and place it at #1 in the list (see screenshot below). If you thought the number of doubles would be the second most important category, you could select it and place it at #2. After selecting catgories, you can rearrange the order of their importance by dragging them up and down.</p>
+				<p>The simulator works by comparing each team across numerous statistical categories, and then simulating the game using an algorithm to predict the most likely score for each team.</p>
+				<p>By default, the simulator treats all statistical comparisons equally in the simulation. This means for example, that the relative strength of each team in stealing bases is as important as the relative strength of the team's records in the simulation.</p>
+				<p>The performance of the simulator can be improved by customizing it to give more important statistical categories more emphasis in the algorithm. You will have the opportunity to select up to 5 categories for the algorithm to emphasize. Also, you can arrange any categories you choose according to their importance.</p>
+				<p>For example, if you believe that the number of stolen bases is the most important category, you could select it and place it at #1 in the list. If you thought the number of doubles would be the second most important category, you could select it and place it at #2. After selecting catgories, you can rearrange the order of their importance by dragging them up and down.</p>
             <p>Next, you will be shown the simulator's prediction for the game and asked to make your own predictions.</p>
             <h3>Scoring in the fantasy baseball game</h3>
             <p>Your score for your prediction of each game is calculated as follows:</p>
@@ -26,10 +25,10 @@ $var title: Instructions
                         <li>For each team, you also lose 1 point for the absolute difference between their runs scored and your prediction for their runs scored</li>
                         <li>The minumum number of points you can earn is 0</li>
 	    </ul>
-            <p>For example, if the final score of a game is Away team 5, Home team 3, and you predicted Away team 2, Home team 4, you would earn 5 points. You lose 10 for choosing the wrong winner. For the away team, you missed by 3 runs, and you missed the home team by 2 runs, leaving you with 5 for the game.</p>
+            <p>Example: You predict <strong>Away: 2 | Home: 4</strong> and the actual score is <strong>Away: 5 | Home: 3</strong> your score is <strong>20</strong> - <strong>10</strong>(wrong winner) - <strong>3</strong> (away score inaccuracy) - <strong>1</strong> (home score inaccuracy) = <strong>6 points</strong>.</p>
 	    $if condition ==1:
 			<p>On average, the simulator's predictions score about 15 points per game under the default settings. But its performance can vary considerably.</p>
-            $else:
+        $else:
 			<p>On average, the simulator's predictions score about 15 points per game. But its perfomance can vary considerably.</p>
 	    <p><strong>Confidence points:</strong> In addition to earning points directly from your predictions, for each game you are given an additional 10 points. With these points, you may keep them and add them to your total for the game. Or you can wager some or all of them. The wager is that you scored at least 15 points from your prediction. The return on this wager is 3 to 1. If you wager 4 confidence points and you earn 15 points from your prediction, you will earn 12 additional points. This wager is intended to indicate your confidence in your prediction.</p>
 	    
@@ -44,6 +43,7 @@ $var title: Instructions
 	</div>     
     <div id="continue">
         <p>Be sure you fully understand the instructions. Before completing the task, you must pass a quiz on these instructions</p>
-        <p><a href="quiz?worker_id=$worker_id">Click here to continue to the quiz</a></p>
+        <p><a href="/quiz?worker_id=$worker_id">Click here to continue to the quiz</a></p>
+        <p>If you have already passed the quiz, <a href="/restore?worker_id=$worker_id">click here to return to the game</a></p>
     </div>
 </div>

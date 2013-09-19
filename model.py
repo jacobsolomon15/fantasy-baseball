@@ -18,33 +18,35 @@ def new_subject(worker_id, condition, order, ip, bad_games):
     claim_code = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(7))
     claim_code += "GES"
     
-    q = "insert into subjects (ip, worker_id, consent_agreed, instructions_viewed, customize, games_completed, game1, game2, game3, game4, game5, game6, game7, game8, game9, game10, game11, game12, bad1, bad2, bad3, bad4, claim_code, stage) values ('%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', 1)" % (ip, worker_id, "now()", str(1), str(condition), str(0), str(order[0]), str(order[1]), str(order[2]), str(order[3]), str(order[4]), str(order[5]), str(order[6]), str(order[7]), str(order[8]), str(order[9]), str(order[10]), str(order[11]), str(bad_games[0]), str(bad_games[1]), str(bad_games[2]), str(bad_games[3]), claim_code)
+    q = "insert into subjects (ip, worker_id, consent_agreed, quiz_tries, instructions_viewed, customize, games_completed, game1, game2, game3, game4, game5, game6, game7, game8, game9, game10, game11, game12, bad1, bad2, bad3, bad4, claim_code, stage) values ('%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', 1)" % (ip, worker_id, "now()", str(0), str(0), str(condition), str(0), str(order[0]), str(order[1]), str(order[2]), str(order[3]), str(order[4]), str(order[5]), str(order[6]), str(order[7]), str(order[8]), str(order[9]), str(order[10]), str(order[11]), str(bad_games[0]), str(bad_games[1]), str(bad_games[2]), str(bad_games[3]), claim_code)
     return db.query(q)
     
 def get_condition(worker_id):
+
+    q = "select customize from subjects where worker_id = '%s'" % (worker_id)
     try:
-        q = "select customize from subjects where worker_id = '%s'" % (worker_id)
-        #return db.query(q)[0]
-        condition = db.query(q)[0]['customize']
+	condition = db.query(q)[0].customize
         return condition
     except IndexError:
-        return 2 # 2 means there is no entry for this worker_id
+	return 2 # 2 means there is no entry for this worker_id
     
 def view_instructions(worker_id):
     q = "update subjects set instructions_viewed = instructions_viewed + 1 where worker_id = '%s'" % (worker_id)
     return db.query(q)
     
-def get_game_id(worker_id):
-    games_played = get_games_played(worker_id)
+def get_game_id(worker_id, game_number):
+    #games_played = get_games_played(worker_id)
     
-    if games_played > 11:
+    
+    if int(game_number) > 12:
         return None
     
     #games_played = int(db.select('subjects', where='worker_id=$worker_id', what='games_completed')[0])
-    game_field = "game" + str(games_played + 1)
+    game_field = "game" + str(game_number)
     
     
     q = "select %s as game from subjects where worker_id='%s'" % (game_field, worker_id)
+    print q
     return db.query(q)[0].game
     #return db.select('subjects', what = game_field, where='worker_id=$worker_id')[0]
     
@@ -65,9 +67,12 @@ def add_customize_info(worker_id, data):
     pass
     
 def get_games_played(worker_id):
-    q = "select games_completed from subjects where worker_id = '%s'" % (worker_id)
-    games_played = int(db.query(q)[0].games_completed)
+    q = "select max(game_order) as games_completed from predictions where worker_id = '%s' and enter_predictions_stop is not null" % (worker_id)
     
+    try:
+	    games_played = int(db.query(q)[0].games_completed)
+    except TypeError:
+    	games_played = 0
     return games_played
 
 def get_prediction_quality(worker_id, game_id):
@@ -89,6 +94,8 @@ def get_prediction_quality(worker_id, game_id):
 def create_prediction_entry(worker_id, game_id):
     
     games_played = get_games_played(worker_id)
+    if not games_played:
+    	games_played = 0
     q = "insert into predictions (worker_id, view_stats_start, game_order, game_type) values ('%s', now(), %s, %s)" % (worker_id, str(games_played+1), game_id)
     db.query(q)
     
@@ -154,7 +161,10 @@ def check_for_existing_prediction_record(worker_id, game_id):
     
 def check_current_game_status(worker_id, game_id):
     q = "select enter_predictions_start from predictions where worker_id = '%s' and game_type = %s" % (worker_id, str(game_id))
-    return db.query(q)[0].enter_predictions_start
+    
+    check = db.query(q)[0].enter_predictions_start
+    print check
+    return check
     
 def get_claim_code(worker_id):
     q = "select claim_code from subjects where worker_id = '%s'" % (worker_id)
@@ -165,6 +175,20 @@ def get_claim_code(worker_id):
 def check_for_existing_prediction_entered(worker_id, game_id):
     q = "select count(*) as entries from predictions where home_score is not null and worker_id = '%s' and game_type = %s" % (worker_id, game_id)
     return db.query(q)[0].entries
+
+def update_instructions_views(worker_id):
+	q = "update subjects set instructions_viewed = instructions_viewed + 1 where worker_id = '%s'" % (worker_id)
+	db.query(q)
+	
+def update_quiz_tries(worker_id):
+	q = "update subjects set quiz_tries = quiz_tries + 1 where worker_id = '%s'" % (worker_id)
+	db.query(q)
+	
+def update_quiz_completed(worker_id):
+	q = "update subjects set quiz_completed = now() where worker_id = '%s'" % (worker_id)
+	db.query(q)
     
-    
+def check_for_passed_quiz(worker_id):
+	q = "select quiz_completed from subjects where worker_id = '%s'" % (worker_id)
+	return db.query(q)[0].quiz_completed
 
